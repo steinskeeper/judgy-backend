@@ -28,19 +28,26 @@ def chatAgent_endpoint():
 @router.post("/chat-agent")
 async def invoke_chat_agent(request: Request):
     data = await request.json()
+    print("Data",data)
     project = db.projects.find_one({"_id": ObjectId(data["project_id"])})
+    print("project", project)
     DIRECTORY = "projects_source_code/"+data["project_id"]
     loader = DirectoryLoader(DIRECTORY, silent_errors=True)
+    print("loader", loader)
     llm = ChatVertexAI()
     index = VectorstoreIndexCreator().from_loaders([loader])
+    print("index creation", index)
     retriever = index.as_retriever()
     memory = VectorStoreRetrieverMemory(retriever=retriever)
+    print("before context memory", memory)
     memory.save_context(
         {"input": "Idea : "+project["shortDescription"]}, {"output": "..."})
     if len(data["chathistory"]) > 0:
         for chat in data["chathistory"]:
-            memory.save_context({"input": chat["question"]}, {
-                                "output": chat["answer"]})
+            memory.save_context({"input": chat["input"]}, {
+                                "output": chat["output"]})
+    
+    print("after context memory", memory)
 
     _DEFAULT_TEMPLATE = """The following is a conversation between a hackathon judge and an AI. 
     The AI is a market researcher and a code reviewer. 
