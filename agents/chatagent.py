@@ -37,7 +37,7 @@ async def invoke_chat_agent(request: Request):
     llm = ChatVertexAI()
     index = VectorstoreIndexCreator().from_loaders([loader])
     print("index creation", index)
-    retriever = index.as_retriever()
+    retriever = index.vectorstore.as_retriever()
     memory = VectorStoreRetrieverMemory(retriever=retriever)
     print("before context memory", memory)
     memory.save_context(
