@@ -34,21 +34,23 @@ async def invoke_code_agent(repolink: str, project_id: str):
     for x in db.hackathons.find():
         technologies = x["technologies"]
     prompt = """
-        You are a code reviwer. This is a hackathon project. You have to answer the question about the project.
+        You are a code reviewer. This is a hackathon project. You have to answer the question about the project.
         Question: {question}
         Rules for answering: 
             1. Remember to answer like a code reviewer.
-            2. Answer the question as best you can, in a paragraph.
+            2. Answer the question as best you can. If you are unable to answer, say 'I am unsure, I need human assistance' .
             3. You must answer in one paragraph. Do not use formatting.
             4. Your paragraph must not have more than 70 words.
+            5. You must analyze all the files in the project.
+            6. If you don't know the answer, you must research and answer.
         """
 
-    questionToAsk = ["Are there any parts in the code that is incomplete?",
-                     "What are the technologies and programming language used in this project?",
-                     "Explain the project in brief",
-                     "How is the code quality of this project?",
-                     "Does the project import and use any of the following dependencies/packages/APIs/libraries : "+technologies + "? ",
-                     ]
+    questionToAsk = [
+        "What are the technologies and programming language used in this project?",
+        "Explain the project in brief",
+        "How is the code quality of this project?",
+        "Does the project import and use any of the following dependencies/packages/APIs/libraries : "+technologies + "? ",
+    ]
     agentAnswers = []
     for question in questionToAsk:
         response = index.query(question, llm)
