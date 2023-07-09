@@ -6,10 +6,17 @@ from agents.marketagent import router as marketAgent_router
 from agents.codeagent import router as codeAgent_router
 from agents.chatagent import router as chatAgent_router
 from agents.crudagent import router as crudAgent_router
+from fastapi.middleware.cors import CORSMiddleware
 import os
 load_dotenv()
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(marketAgent_router, prefix="/api", tags=["Market Agent"])
 app.include_router(codeAgent_router, prefix="/api", tags=["Code Agent"])
 app.include_router(chatAgent_router, prefix="/api", tags=["Chat Agent"])
