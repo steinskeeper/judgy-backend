@@ -5,12 +5,14 @@ from git import Repo
 from langchain.document_loaders import GitLoader
 from fastapi import APIRouter
 import asyncio
+from bson.objectid import ObjectId
 
 from pymongo import MongoClient
 router = APIRouter()
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["judgy"]
+
 
 @router.get("/code-agent")
 def codeAgent_endpoint():
@@ -19,7 +21,7 @@ def codeAgent_endpoint():
 
 async def invoke_code_agent(repolink: str, project_id: str):
     await asyncio.sleep(5)
-    DIRECTORY = "projects_source_code/"+project_id
+    DIRECTORY = "./projects_source_code/"+project_id
     repo = Repo.clone_from(
         repolink, to_path=DIRECTORY
     )
@@ -31,22 +33,33 @@ async def invoke_code_agent(repolink: str, project_id: str):
     technologies = ""
     for x in db.hackathons.find():
         technologies = x["technologies"]
-    
-    questionToAsk = ["Is the code complete?", "Is the project using the following technologies: ?"+technologies, "Talk about the code quality of the project?"]
+    prompt = """
+        You are a code reviwer. This is a hackathon project. You have to answer the question about the project.
+        Question: {question}
+        Rules for answering: 
+            1. Remember to answer like a code reviewer.
+            2. Answer the question as best you can, in a paragraph.
+            3. You must answer in one paragraph. Do not use formatting.
+            4. Your paragraph must not have more than 70 words.
+        """
+
+    questionToAsk = ["Are there any parts in the code that is incomplete?",
+                     "What are the technologies and programming language used in this project?",
+                     "Explain the project in brief",
+                     "How is the code quality of this project?",
+                     "Does the project import and use any of the following dependencies/packages/APIs/libraries : "+technologies + "? ",
+                     ]
     agentAnswers = []
     for question in questionToAsk:
         response = index.query(question, llm)
         agentAnswers.append(response)
-    
+
     # Save the answers to the database
     final = []
     for i in range(len(questionToAsk)):
         newval = {"question": questionToAsk[i], "answer": agentAnswers[i]}
         final.append(newval)
-    query = {"_id": project_id}
+    query = {"_id": ObjectId(project_id)}
     newvalues = {"$set": {"codeAgentAnalysis": final}}
     db.projects.update_one(query, newvalues)
     print("Code Agent : Task Complete")
-
-
-    

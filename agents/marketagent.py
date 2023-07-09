@@ -5,12 +5,14 @@ from langchain.agents import initialize_agent, Tool, AgentType
 from langchain.tools import DuckDuckGoSearchRun
 from langchain.llms import VertexAI
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 search = DuckDuckGoSearchRun()
 
 router = APIRouter()
 client = MongoClient("mongodb://localhost:27017/")
 db = client["judgy"]
+
 
 @router.get("/market-agent")
 async def marketAgent_endpoint():
@@ -20,7 +22,7 @@ async def marketAgent_endpoint():
 
 async def invoke_market_agent(project_id: str, idea: str):
     await asyncio.sleep(5)
-    llm = VertexAI(model_name="text-bison@001")
+    llm = VertexAI()
     tools = [
         Tool(
             name="Intermediate Answer",
@@ -28,9 +30,15 @@ async def invoke_market_agent(project_id: str, idea: str):
             description="useful for when you need to ask with search",
         )
     ]
-    marketQuestion = ["target audience",
-                      "current market competitors", "potential", "pitfalls", "market size"]
+
+    marketQuestion = [
+        "Who is the target audience of this idea?",
+        "What is the potential of this idea?",
+        "What is the market size of this idea?",
+        "What are the pitfalls of this idea?",
+        "Are there any platforms like the idea, that already exist?"]
     agentAnswers = []
+
     def getAnswer(question):
         self_ask_with_search = initialize_agent(
             tools, llm, agent=AgentType.SELF_ASK_WITH_SEARCH, verbose=True
@@ -43,19 +51,22 @@ async def invoke_market_agent(project_id: str, idea: str):
             1. Use statistical data where ever possible.
             2. Remember to answer like a market researcher.
             3. Answer the question as best you can, in a paragraph.
+            4. You must answer in one paragraph. Do not use formatting.
+            5. Your paragraph must not have more than 70 words.
         """
         prompt = prompt.format(question=question, idea=idea)
         resp = self_ask_with_search.run(prompt)
         agentAnswers.append(resp)
     for i in marketQuestion:
         getAnswer(i)
-    
+
     final = []
     for i in range(len(marketQuestion)):
         newval = {"question": marketQuestion[i], "answer": agentAnswers[i]}
         final.append(newval)
-    query = {"_id": project_id}
+    print(final)
+    print("project_id", project_id)
+    query = {"_id": ObjectId(project_id)}
     newvalues = {"$set": {"marketAgentAnalysis": final}}
-    db.projects.update_one(query, newvalues)
+    temp = db.projects.update_one(query, newvalues)
     print("Market Agent : Task Complete")
-    
