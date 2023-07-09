@@ -71,7 +71,7 @@ async def invoke_chat_agent(request: Request):
     aiResp = conversation_with_summary.predict(input=data["question"])
     chatHistory = data["chathistory"]
     chatHistory.append(
-        {"question": data["question"], "answer": aiResp})
+        {"input": data["question"], "output": aiResp})
     
     return {
         "answer": aiResp,
