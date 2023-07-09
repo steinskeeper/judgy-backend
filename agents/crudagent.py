@@ -62,13 +62,8 @@ async def review_project(request: Request):
     return {"message": "successful", "project_id": project_id}
 
 
-# market agent
-# chat agent
-# general agent
-# create hackathon config
-# add all projects
-# get all projects
-# Search
-# get project by id
 
+# general agent
+# add all projects
+# Search
 # analytics

@@ -30,7 +30,11 @@ async def invoke_chat_agent(request: Request):
     data = await request.json()
     print("Data",data)
     project = db.projects.find_one({"_id": ObjectId(data["project_id"])})
-    print("project", project)
+    technologies = ""
+    theme = ""
+    for x in db.hackathons.find():
+        technologies = x["technologies"]
+        theme = x["theme"]
     DIRECTORY = "projects_source_code/"+data["project_id"]
     loader = DirectoryLoader(DIRECTORY, silent_errors=True)
     print("loader", loader)
@@ -42,6 +46,10 @@ async def invoke_chat_agent(request: Request):
     print("before context memory", memory)
     memory.save_context(
         {"input": "Idea : "+project["shortDescription"]}, {"output": "..."})
+    memory.save_context(
+        {"input": "Theme for the Hackathon : "+theme}, {"output": "..."})
+    memory.save_context(
+        {"input": "Technologies that must be used for the hackathon project : "+technologies}, {"output": "..."})
     
     print("after context memory", memory)
 
