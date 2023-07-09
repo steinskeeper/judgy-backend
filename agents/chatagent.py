@@ -42,10 +42,6 @@ async def invoke_chat_agent(request: Request):
     print("before context memory", memory)
     memory.save_context(
         {"input": "Idea : "+project["shortDescription"]}, {"output": "..."})
-    if len(data["chathistory"]) > 0:
-        for chat in data["chathistory"]:
-            memory.save_context({"input": chat["input"]}, {
-                                "output": chat["output"]})
     
     print("after context memory", memory)
 

@@ -52,6 +52,16 @@ async def get_all_projects():
         final.append(project)
     return {"message": "successful", "projects": final}
 
+@router.post("/review")
+async def review_project(request: Request):
+    data = await request.json()
+    project_id = data["project_id"]
+    query = {"_id": ObjectId(project_id)}
+    new_values = {"$set": {"isReviewed": data["isReviewed"]}}
+    db.projects.update_one(query, new_values)
+    return {"message": "successful", "project_id": project_id}
+
+
 # market agent
 # chat agent
 # general agent
