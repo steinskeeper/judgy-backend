@@ -1,10 +1,79 @@
-from fastapi import APIRouter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.prompts import PromptTemplate
+from langchain.chains import ConversationChain
+from bson import ObjectId
+from fastapi import APIRouter, Request
+from langchain.document_loaders import GitLoader
+from dotenv import load_dotenv
+from langchain.document_loaders import DirectoryLoader
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.chat_models import ChatVertexAI
+import os
+from langchain.memory import VectorStoreRetrieverMemory
+from pymongo import MongoClient
+load_dotenv()
+
 
 router = APIRouter()
+client = MongoClient("mongodb://localhost:27017/")
+db = client["judgy"]
+
 
 @router.get("/chat-agent")
 def chatAgent_endpoint():
     return {"message": "Hello from Chat Agent"}
 
-def invoke_chat_agent():
-    return {"message": "Hello from Chat Agent"}
+
+@router.post("/chat-agent")
+async def invoke_chat_agent(request: Request):
+    data = await request.json()
+    project = db.projects.find_one({"_id": ObjectId(data["project_id"])})
+    DIRECTORY = "projects_source_code/"+data["project_id"]
+    loader = DirectoryLoader(DIRECTORY, silent_errors=True)
+    llm = ChatVertexAI()
+    index = VectorstoreIndexCreator().from_loaders([loader])
+    retriever = index.as_retriever()
+    memory = VectorStoreRetrieverMemory(retriever=retriever)
+    memory.save_context(
+        {"input": "Idea : "+project["shortDescription"]}, {"output": "..."})
+    if len(data["chathistory"]) > 0:
+        for chat in data["chathistory"]:
+            memory.save_context({"input": chat["question"]}, {
+                                "output": chat["answer"]})
+
+    _DEFAULT_TEMPLATE = """The following is a conversation between a hackathon judge and an AI. 
+    The AI is a market researcher and a code reviewer. 
+    Rules for answering: 
+    1. Use statistical data where ever possible.
+    2. Remember to answer like a market researcher.
+    3. Answer the question as best you can, in a paragraph.
+    4. You must answer in one paragraph. Do not use formatting.
+    5. Your paragraph must not have more than 70 words.
+
+    Relevant pieces of previous conversation:
+    {history}
+
+    (You do not need to use these pieces of information if not relevant)
+
+    Current conversation:
+    Human: {input}
+    AI:"""
+    PROMPT = PromptTemplate(
+        input_variables=["history", "input"], template=_DEFAULT_TEMPLATE
+    )
+    conversation_with_summary = ConversationChain(
+        llm=llm,
+        prompt=PROMPT,
+        memory=memory,
+        verbose=True
+    )
+    aiResp = conversation_with_summary.predict(input=data["question"])
+    chatHistory = data["chathistory"]
+    chatHistory.append(
+        {"question": data["question"], "answer": aiResp})
+    
+    return {
+        "answer": aiResp,
+        "chathistory": chatHistory
+    } 
