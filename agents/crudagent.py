@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import APIRouter, Request
 from pymongo import MongoClient
 from agents.codeagent import invoke_code_agent
@@ -18,7 +19,7 @@ def crudAgent_endpoint():
 async def create_project(request: Request):
     data = await request.json()
     print(data)
-
+    data["isReviewed"] = False
     new_project = db.projects.insert_one(data)
     print(new_project.inserted_id)
 
@@ -35,6 +36,21 @@ async def create_hackathon(request: Request):
     print(new_hackathon.inserted_id)
     
     return {"message": "Hackathon created", "hackathon_id": str(new_hackathon.inserted_id)}
+
+@router.get("/get-project/{project_id}")
+async def get_project(project_id: str):
+    project = db.projects.find_one({"_id": ObjectId(project_id)})
+    project["_id"] = str(project["_id"])
+    return {"message": "successful", "project": project}
+
+@router.get("/get-all")
+async def get_all_projects():
+    projects = db.projects.find({})
+    final = []
+    for project in projects:
+        project["_id"] = str(project["_id"])
+        final.append(project)
+    return {"message": "successful", "projects": final}
 
 # market agent
 # chat agent
