@@ -32,6 +32,7 @@ async def invoke_code_agent(repolink: str, project_id: str):
     technologies = ""
     for x in db.hackathons.find():
         technologies = x["technologies"]
+        break
     prompt = """
         You are a code reviewer. This is a hackathon project. You have to answer the question about the project.
         Question: {question}

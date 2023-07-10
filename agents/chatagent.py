@@ -39,6 +39,7 @@ async def invoke_chat_agent(request: Request):
             isAllowed = x["isAllowed"]
         else:
             isAllowed = False
+        break
     if isAllowed == False:
         return {"answer": "Sorry, We have reached our credit limit.", "chathistory": []}
     print("Data",data)
