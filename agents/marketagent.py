@@ -21,7 +21,10 @@ async def marketAgent_endpoint():
 
 
 async def invoke_market_agent(project_id: str, idea: str):
-    await asyncio.sleep(5)
+    for x in db.hackathons.find():
+        technologies = x["technologies"]
+        theme = x["theme"]
+    
     llm = VertexAI()
     tools = [
         Tool(

@@ -20,7 +20,6 @@ def codeAgent_endpoint():
 
 
 async def invoke_code_agent(repolink: str, project_id: str):
-    await asyncio.sleep(5)
     DIRECTORY = "./projects_source_code/"+project_id
     repo = Repo.clone_from(
         repolink, to_path=DIRECTORY
