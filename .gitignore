@@ -4,3 +4,4 @@ env
 .env
 project_source_code/*
 .chroma
+.vscode
