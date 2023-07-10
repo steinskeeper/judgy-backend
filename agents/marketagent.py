@@ -89,8 +89,8 @@ async def invoke_market_agent(project_id: str, idea: str):
     """
     theme_prompt = theme_prompt.format(theme=theme, idea=idea)
     response = model.predict(
-        theme_prompt
-        ** parameters
+        theme_prompt,
+        **parameters
     )
     finalTheme = response.text
     print("project_id", project_id)

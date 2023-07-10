@@ -59,7 +59,7 @@ async def get_all_projects():
     for project in projects:
         project["_id"] = str(project["_id"])
         final.append(project)
-    return {"message": "successful", "projects": final}
+    return {"message": "successful", "projects": final.reverse()}
 
 
 @router.post("/review")
