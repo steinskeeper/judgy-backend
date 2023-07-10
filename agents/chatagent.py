@@ -27,14 +27,23 @@ def chatAgent_endpoint():
 
 @router.post("/chat-agent")
 async def invoke_chat_agent(request: Request):
+
     data = await request.json()
-    print("Data",data)
-    project = db.projects.find_one({"_id": ObjectId(data["project_id"])})
     technologies = ""
     theme = ""
+    isAllowed = False
     for x in db.hackathons.find():
         technologies = x["technologies"]
         theme = x["theme"]
+        if "isAllowed" in x:
+            isAllowed = x["isAllowed"]
+        else:
+            isAllowed = False
+    if isAllowed == False:
+        return {"answer": "Sorry, We have reached our credit limit.", "chathistory": []}
+    print("Data",data)
+    project = db.projects.find_one({"_id": ObjectId(data["project_id"])})
+    
     DIRECTORY = "projects_source_code/"+data["project_id"]
     loader = DirectoryLoader(DIRECTORY, silent_errors=True)
     print("loader", loader)
@@ -61,7 +70,7 @@ async def invoke_chat_agent(request: Request):
     3. Answer the question as best you can, in a paragraph.
     4. You must answer in one paragraph. Do not use formatting.
     5. Your paragraph must not have more than 70 words.
-
+    6. You must analyze all the files in the project when a code related question is asked.
     Relevant pieces of previous conversation:
     {history}
 

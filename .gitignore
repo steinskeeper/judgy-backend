@@ -2,4 +2,5 @@ lofty-bolt-383703-490fb68bf157.json
 __pycache__
 env
 .env
-project_source_code
+project_source_code/*
+.chroma
