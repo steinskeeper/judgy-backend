@@ -34,7 +34,7 @@ The backend is using the following technologies:
 
 To get started with the project, follow these steps:
 
-1.  Clone the repository: `git clone https://github.com/SutureLogs/backend`
+1.  Clone the repository: `git clone https://github.com/steinskeeper/judgy-backend`
 2.  Install dependencies: `pip install -r requirements.txt`
 3.  Create a `.env` file and add the following variable `GOOGLE_APPLICATION_CREDENTIALS=<path of the service worker json file>`
 4.  Start the server: `python server.py`
@@ -42,4 +42,5 @@ To get started with the project, follow these steps:
 
 
 ## Submission Video
+[](https://youtu.be/8UYPhdfQ1-w)
 
