@@ -3,6 +3,8 @@
 #
 The frontend code for the project can be found here [https://github.com/yajatvishwak/judgy-frontend](https://github.com/yajatvishwak/judgy-frontend)
 
+[![Submission Video](https://img.youtube.com/vi/GBySdWz1bng/0.jpg)](https://www.youtube.com/watch?v=GBySdWz1bng)
+
 ## What is Judgy?
 
 Judgy streamlines the evaluation process for hackathon judges by leveraging AI to assist in code examination, market research, and providing interactive chat capabilities, along with an efficient semantic search functionality to navigate through numerous project submissions.
@@ -41,6 +43,5 @@ To get started with the project, follow these steps:
 5.  The server runs on port `8000`
 
 
-## Submission Video
-[](https://youtu.be/8UYPhdfQ1-w)
+
 
